@@ -1,0 +1,56 @@
+useEffect(() => {
+    const savedBids = localStorage.getItem('bids');
+    if (savedBids) {
+      setBids(JSON.parse(savedBids));
+    }
+  }, []);
+
+
+  const placeBid = (artifact, newBidAmount) => {
+    const parsedNewBidAmount = parseFloat(newBidAmount.replace(/[^\d.-]/g, ''));
+  
+    if (isNaN(parsedNewBidAmount) || parsedNewBidAmount <= 0) {
+      alert('Please enter a valid bid amount greater than 0.');
+      return;
+    }
+  
+    setBids((prevBids) => {
+      const existingBidIndex = prevBids.findIndex(
+        (bid) => bid.artifact === artifact.name
+      );
+  
+      let updatedBids;
+      if (existingBidIndex !== -1) {
+        const currentHighestBid = parseFloat(
+          prevBids[existingBidIndex].highestBid.replace(/[^\d.-]/g, '')
+        );
+  
+        if (parsedNewBidAmount > currentHighestBid) {
+          updatedBids = [...prevBids];
+          updatedBids[existingBidIndex] = {
+            ...updatedBids[existingBidIndex],
+            highestBid: `$${parsedNewBidAmount.toFixed(2)}`,
+          };
+        } else {
+          alert(`Your bid must be higher than the current bid.`);
+          return prevBids;
+        }
+      } else {
+        updatedBids = [
+          ...prevBids,
+          {
+            artifact: artifact.name,
+            highestBid: `$${parsedNewBidAmount.toFixed(2)}`,
+            image: artifact.image,
+          },
+        ];
+      }
+  
+      // Save updated bids to localStorage
+      localStorage.setItem('bids', JSON.stringify(updatedBids));
+      console.log("Updated LocalStorage:", localStorage.getItem('bids'));
+  
+      return updatedBids;
+    });
+  };
+  
